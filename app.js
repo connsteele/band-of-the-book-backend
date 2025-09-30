@@ -16,25 +16,36 @@ if (process.env.NODE_ENV != "production") {
 let whitelist = new Set();
 
 async function buildWhitelist() {
+    const envOrigins = (process.env.ALLOWED_ORIGINS || "")
+        .split(",")
+        .map((str) => str.trim())
+        .filter(Boolean);
+
+    let dbOrigins = [];
     try {
         const res = await prisma.origin.findMany();
-        const dbOrigins = res.map((obj) => obj.url);
-        const envOrigins = process.env.ALLOWED_ORIGINS.split(",");
-        whitelist = new Set([...dbOrigins, ...envOrigins]);
-    } catch (error) {
-        console.log(error);
-        throw error;
+        if (res.length > 0)
+            dbOrigins = res.map((obj) => obj.url);
+
+    } catch (err) {
+        console.error("Failed to load whitelisted origins from database", err);
     }
+    whitelist = new Set([...dbOrigins, ...envOrigins]);
+    console.log(`CORS Whitelist: `, Array, from(whitelist));
 }
 
 const corsOptions = {
     origin: (origin, callback) => {
+        // Allow server-to-server requests (curl, etc)
+        if (!origin)
+            callback(null, true)
+
         if (whitelist.has(origin)) {
             console.log(`Origin ${origin} is granted CORS access`);
             callback(null, true);
         }
         else {
-            callback(new Error("Not allowed by CORS"));
+            callback(new Error(`Origin: ${origin} not whitelisted for CORS`));
         }
     }
 };
