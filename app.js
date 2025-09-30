@@ -3,7 +3,7 @@ const app = express();
 const prisma = require("./db/prisma");
 const cors = require("cors");
 const init = require("./db/init");
-const homeRouter = require("./routes/homeRouter");
+const postsRouter = require("./routes/postsRouter");
 const newPostRouter = require("./routes/newPostRouter");
 
 
@@ -55,7 +55,7 @@ async function start() {
     app.use(cors(corsOptions));
 
     // Routes
-    app.use("/", homeRouter);
+    app.use("/posts", postsRouter);
     app.use("/new-post", newPostRouter);
 
     (async () => {

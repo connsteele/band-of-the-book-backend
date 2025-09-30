@@ -1,4 +1,4 @@
-const { connect } = require("../routes/homeRouter");
+const { connect } = require("../routes/postsRouter");
 const prisma = require("./prisma");
 
 async function populateGenreTable() {
