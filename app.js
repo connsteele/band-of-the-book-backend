@@ -24,8 +24,11 @@ async function buildWhitelist() {
     let dbOrigins = [];
     try {
         const res = await prisma.origin.findMany();
-        if (res.length > 0)
+        if (res.length > 0) {
             dbOrigins = res.map((obj) => obj.url);
+            dbOriginsCache = new Set(dbOrigins);
+        }
+
 
     } catch (err) {
         console.error("Failed to load whitelisted origins from database", err);
@@ -35,18 +38,41 @@ async function buildWhitelist() {
 }
 
 const corsOptions = {
-    origin: (origin, callback) => {
+    origin: async (origin, callback) => {
         // Allow server-to-server requests (curl, etc)
-        if (!origin)
-            callback(null, true)
+        if (!origin){
+            callback(null, true);
+            return;
+        }
+            
 
         if (whitelist.has(origin)) {
             console.log(`Origin ${origin} is granted CORS access`);
             callback(null, true);
+            return;
         }
-        else {
-            callback(new Error(`Origin: ${origin} not whitelisted for CORS`));
+
+        try {
+            const found = await prisma.origin.findFirst({
+                where: {
+                    url: origin
+                }
+            })
+
+            if (!found) 
+                throw new Error(`Origin: ${origin} not found in database or whitelist`);
+
+            console.log(`Origin: ${origin} found in database. Updating whitelist.`);
+            await buildWhitelist();
+            callback(null, true);
+            return;
+
+        } catch (err) {
+            console.error(err);
+            callback(err);
+            return;
         }
+
     }
 };
 

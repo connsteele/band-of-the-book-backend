@@ -6,7 +6,7 @@ const prisma = require("../db/prisma");
  * @param {*} res Response
  * @param {*} next
  */
-async function getHome(req, res, next) {
+async function postsGet(req, res, next) {
     const { limit, order } = req.query;
     const limitInt = parseInt(limit);
 
@@ -67,5 +67,5 @@ async function getHome(req, res, next) {
 };
 
 module.exports = {
-    getHome
+    postsGet
 }
