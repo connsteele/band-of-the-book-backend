@@ -108,7 +108,7 @@ async function populatePostTable() {
         {
             title: "Best Served Cold",
             userName: "example",
-            content: "Seeded review",
+            content: "A thoroughly entertaining story of blood-soaked vengeance. Best Served Cold is more episodic in nature -compared to the initial First Law Trilogy- causing some momentum issues as I was reading through. Despite this, the book contains many of the most entertaining moments in the series thus far and catapulted characters with small roles before into being some of my favorites (looking at you, Shivers). Seeing how this cast of misfits quarrel and work together makes this worth the read alone.",
             score: 4.25,
             formats: ["eBook", "Audiobook"],
 
@@ -124,7 +124,7 @@ async function populatePostTable() {
                     title: post.title
                 }
             })
-            if (exists) {
+            if (exists.length > 0) {
                 continue;
             }
 
