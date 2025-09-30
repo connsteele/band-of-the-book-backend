@@ -31,7 +31,7 @@ async function buildWhitelist() {
         console.error("Failed to load whitelisted origins from database", err);
     }
     whitelist = new Set([...dbOrigins, ...envOrigins]);
-    console.log(`CORS Whitelist: `, Array, from(whitelist));
+    console.log(`CORS Whitelist: `, Array.from(whitelist));
 }
 
 const corsOptions = {
