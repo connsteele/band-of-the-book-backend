@@ -4,7 +4,7 @@ const prisma = require("./db/prisma");
 const cors = require("cors");
 const init = require("./db/init");
 const postsRouter = require("./routes/postsRouter");
-const newPostRouter = require("./routes/newPostRouter");
+const formatsRouter = require("./routes/formatsRouter");
 
 
 if (process.env.NODE_ENV != "production") {
@@ -82,7 +82,7 @@ async function start() {
 
     // Routes
     app.use("/posts", postsRouter);
-    app.use("/new-post", newPostRouter);
+    app.use("/formats", formatsRouter);
 
     (async () => {
         await init.populateTables();

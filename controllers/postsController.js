@@ -7,41 +7,47 @@ const prisma = require("../db/prisma");
  * @param {*} next
  */
 async function postsGet(req, res, next) {
-    const { limit, order } = req.query;
-    const limitInt = parseInt(limit);
+    let limit = 10;
+    if (req.query.limit) {
+        limit = parseInt(req.query.limit);
+    }
+    const order = req.query.order ? req.query.order : "desc";
 
     // Query the database for posts
-    const posts = await prisma.post.findMany({
-        take: limitInt,
-        orderBy: [{ createdAt: order }],
-        omit: {
-            id: true,
-            userId: true,
-            bookId: true
-        },
-        include: {
-            user: {
-                select: {
-                    name: true
-                }
+    const [posts, count] = await prisma.$transaction([
+        prisma.post.findMany({
+            take: limit,
+            orderBy: [{ createdAt: order }],
+            omit: {
+                id: true,
+                userId: true,
+                bookId: true
             },
-            book: {
-                select: {
-                    title: true,
-                    author: true,
-                    series: true,
-                    entry: true,
-                    cover: true,
-                    genres: true
-                }
-            },
-            formats: {
-                select: {
-                    name: true
+            include: {
+                user: {
+                    select: {
+                        name: true
+                    }
+                },
+                book: {
+                    select: {
+                        title: true,
+                        author: true,
+                        series: true,
+                        entry: true,
+                        cover: true,
+                        genres: true
+                    }
+                },
+                formats: {
+                    select: {
+                        name: true
+                    }
                 }
             }
-        }
-    });
+        }),
+        prisma.post.count(),
+    ]);
 
     if (posts === undefined) {
         console.log(`Error, no post table exists`);
@@ -63,7 +69,12 @@ async function postsGet(req, res, next) {
         cover: post.book.cover
     }));
 
-    res.json(shaped);
+    res.status(200).json({
+        count: count,
+        limit: limit,
+        result: shaped,
+        // can also list next and previous pages
+    });
 };
 
 module.exports = {
