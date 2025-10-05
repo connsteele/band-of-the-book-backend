@@ -6,6 +6,7 @@ const init = require("./db/init");
 const postsRouter = require("./routes/postsRouter");
 const formatsRouter = require("./routes/formatsRouter");
 const genresRouter = require("./routes/genresRouter");
+const usersRouter = require("./routes/usersRouter");
 
 
 if (process.env.NODE_ENV != "production") {
@@ -78,13 +79,17 @@ const corsOptions = {
 };
 
 async function start() {
+    // App Middleware
     await buildWhitelist();
     app.use(cors(corsOptions));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }))
 
     // Routes
     app.use("/posts", postsRouter);
     app.use("/formats", formatsRouter);
     app.use("/genres", genresRouter);
+    app.use("/users", usersRouter);
 
     (async () => {
         await init.populateTables();

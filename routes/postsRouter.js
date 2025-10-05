@@ -4,7 +4,7 @@ const {cacheControl} = require("../middleware/index");
 const postsRouter = Router();
 
 postsRouter.use(cacheControl());
-postsRouter.get("/", postsController.postsGet);
+postsRouter.get("/", postsController.readPosts);
 
 
 module.exports = postsRouter;

@@ -1,4 +1,5 @@
 const prisma = require("../db/prisma");
+const {validate} = require("uuid");
 
 /**
  * Query the database for posts
@@ -6,7 +7,7 @@ const prisma = require("../db/prisma");
  * @param {*} res Response
  * @param {*} next
  */
-async function postsGet(req, res, next) {
+async function readPosts(req, res, next) {
     let limit = 10;
     if (req.query.limit) {
         limit = parseInt(req.query.limit);
@@ -77,6 +78,67 @@ async function postsGet(req, res, next) {
     });
 };
 
+
+async function createPostForUser(req, res, next) {
+    if (!req.params.userId) {
+        console.error("No userId parameter found");
+        throw new Error("No userId parameter found");
+    }
+    const userId = req.params.userId;
+
+    // Validate the userId before going forward
+    validate(userId);
+    uuidv4(userId);
+
+    const {
+        book,
+        author,
+        cover,
+        genres: rawGenres,
+        formats: rawFormats,
+        series = undefined,
+        entry = undefined,
+        score,
+        content
+    } = req.body;
+
+    const genres = Array.isArray(rawGenres) ? rawGenres : [rawGenres];
+    const formats = Array.isArray(rawFormats) ? rawFormats : [rawFormats];
+
+    // For book only create if it does not exist
+        // Can connectORCreate on unique field
+    const result = await prisma.post.create({
+        data: {
+            title: book,
+            user: {
+                connect: {
+                    id: userId
+                }
+            },
+            content: content,
+            score: score,
+            book: {
+                create: {
+                    title: book,
+                    author: author,
+                    series: series,
+                    entry: entry,
+                    cover: cover,
+                    genres: {
+                        connect: genres.map((g) => ({ name: g }))
+                    },
+                }
+            },
+            formats: {
+                connect: formats.map((f) => ({ name: f }))
+            },
+        },
+    });
+
+    console.log(result);
+};
+
 module.exports = {
-    postsGet
+    readPosts,
+    createPostForUser
 }
