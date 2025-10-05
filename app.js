@@ -5,6 +5,7 @@ const cors = require("cors");
 const init = require("./db/init");
 const postsRouter = require("./routes/postsRouter");
 const formatsRouter = require("./routes/formatsRouter");
+const genresRouter = require("./routes/genresRouter");
 
 
 if (process.env.NODE_ENV != "production") {
@@ -83,6 +84,7 @@ async function start() {
     // Routes
     app.use("/posts", postsRouter);
     app.use("/formats", formatsRouter);
+    app.use("/genres", genresRouter);
 
     (async () => {
         await init.populateTables();

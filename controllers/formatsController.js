@@ -1,12 +1,19 @@
 const prisma = require("../db/prisma");
 
 async function formatsGet(req, res, next) {
-    const dbRes = await prisma.format.findMany();
-    const nameArray = dbRes.map((format) => (format.name));
-    const shaped = {
-        formats: nameArray,
-    }
-    res.status(200).json(shaped);
+
+    const [dbRes, count] = await prisma.$transaction([
+        prisma.format.findMany(),
+        prisma.format.count(),
+    ]);
+
+
+    const shaped = dbRes.map((format) => (format.name));
+
+    res.status(200).json({
+        count: count,
+        result: shaped
+    });
 };
 
 module.exports = {
