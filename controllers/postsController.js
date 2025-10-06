@@ -88,7 +88,6 @@ async function createPostForUser(req, res, next) {
 
     // Validate the userId before going forward
     validate(userId);
-    uuidv4(userId);
 
     const {
         book,
@@ -136,6 +135,7 @@ async function createPostForUser(req, res, next) {
     });
 
     console.log(result);
+    res.status(200);
 };
 
 module.exports = {
