@@ -58,12 +58,22 @@ async function readBook(req, res, next) {
     const dbRes = await prisma.book.findUnique({
         where: { id: id},
         include: {
-            genres: true,
+            genres: {
+                select: {
+                    name: true
+                }
+            },
         },
     })
 
     if (dbRes) {
-        const result = dbRes;
+        const entryValue = dbRes.entry.toNumber();
+
+        const result = {
+            ...dbRes,
+            entry: entryValue,
+            genres: dbRes.genres.map((obj) => (obj.name)),
+        };
         return res.status(200).json(result);
     }
 }
