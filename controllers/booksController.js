@@ -1,3 +1,4 @@
+const { skip } = require("@prisma/client/runtime/library");
 const prisma = require("../db/prisma");
 
 const validQueries = new Set([
@@ -23,10 +24,8 @@ async function searchBook(req, res, next) {
         }
     }
 
-    const {
-        title,
-        author
-    } = req.query;
+    const title = req.query.title.trim() === "" ? undefined : req.query.title.trim();
+    const author = req.query.author.trim() === "" ? undefined : req.query.author.trim();
 
 
     // Specific book request, search db and API
