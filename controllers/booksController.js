@@ -6,6 +6,7 @@ const validQueries = new Set([
     "author"
 ]);
 
+
 async function searchBook(req, res, next) {
     // Collection request
     if (Object.entries(req.query).length === 0) {
@@ -45,8 +46,17 @@ async function searchBook(req, res, next) {
         });
     }
 
-    // 2 Check Books API
-
+    // 2 Check Open Library and Google Books API
+    const search = {
+        title,
+        author
+    };
+    const googleRes = await searchGoogleBooks(search);
+    if (googleRes){
+        res.status(200).json({
+            result: googleRes,
+        });
+    }
 
 }
 
@@ -56,7 +66,7 @@ async function readBook(req, res, next) {
         return res.status(400).json({ error: `Invalid book id ${id}` });
 
     const dbRes = await prisma.book.findUnique({
-        where: { id: id},
+        where: { id: id },
         include: {
             genres: {
                 select: {
@@ -76,6 +86,41 @@ async function readBook(req, res, next) {
         };
         return res.status(200).json(result);
     }
+}
+
+async function searchGoogleBooks(search) {
+    if (!search.title) {
+        console.error("No title provided for search of Google Books API");
+        return;
+    }
+
+    const author = search.author ? `+inauthor:${search.author}` : "";
+
+    // const options = `&maxResults=${pageSize}&orderBy=relevance`;
+
+    const base = "https://www.googleapis.com/books/v1/volumes";
+    const params = new URLSearchParams({
+        q: `intitle:${search.title}` + author,
+        maxResults: 5,
+        orderBy: "relevance",
+        fields: "items(volumeInfo/title,volumeInfo/authors,volumeInfo/categories,volumeInfo/imageLinks)",
+        key: process.env.GOOGLE_BOOKS_API
+    });
+
+    const request = `${base}?${params.toString()}`;
+    const res = await fetch(request, { method: "GET" });
+    if (!res.ok) {
+        console.error(`Google Books API could not resolve request`);
+        return;
+    }
+    const data = await res.json();
+    const shaped = data.items.map((item) => ({
+        title: item.volumeInfo.title,
+        authors: item.volumeInfo.authors,
+        genres: item.volumeInfo.categories,
+        images: item.volumeInfo.imageLinks
+    }))
+    return shaped;
 }
 
 module.exports = {
