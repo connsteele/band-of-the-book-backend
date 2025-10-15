@@ -8,6 +8,7 @@ const formatsRouter = require("./routes/formatsRouter");
 const genresRouter = require("./routes/genresRouter");
 const usersRouter = require("./routes/usersRouter");
 const booksRouter = require("./routes/booksRouter");
+const authRouter = require("./routes/authRouter");
 
 
 if (process.env.NODE_ENV != "production") {
@@ -92,6 +93,7 @@ async function start() {
     app.use("/genres", genresRouter);
     app.use("/users", usersRouter);
     app.use("/books", booksRouter);
+    app.use("/auth", authRouter);
 
     (async () => {
         await init.populateTables();

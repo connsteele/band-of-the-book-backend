@@ -47,6 +47,8 @@ async function searchBook(req, res, next) {
     }
 
     // 2 Check Open Library and Google Books API
+    // Await all here then shape results
+
     const search = {
         title,
         author
@@ -103,7 +105,7 @@ async function searchGoogleBooks(search) {
         q: `intitle:${search.title}` + author,
         maxResults: 5,
         orderBy: "relevance",
-        fields: "items(volumeInfo/title,volumeInfo/authors,volumeInfo/categories,volumeInfo/imageLinks)",
+        //fields: "items(volumeInfo/title,volumeInfo/authors,volumeInfo/categories,volumeInfo/imageLinks)",
         key: process.env.GOOGLE_BOOKS_API
     });
 
