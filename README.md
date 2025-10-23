@@ -9,7 +9,7 @@ Backend for book blog
   * For development create a .env in the root folder
   * GOOGLE_BOOKS_API
     * Credentials for Google Books API
-  * DATABASE_URL="postgresql://<role_name>:<role_password>*@localhost:5432/<database>?schema=public"
+  * DATABASE_URL="postgresql://<role_name>:<role_password>@localhost:5432/<database>?schema=public"
   * ALLOWED_ORIGINS="origin,origin"
     * Comma seperated list of allowed origins
 
