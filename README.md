@@ -12,6 +12,8 @@ Backend for book blog
   * DATABASE_URL="postgresql://<role_name>:<role_password>@localhost:5432/<database>?schema=public"
   * ALLOWED_ORIGINS="origin,origin"
     * Comma seperated list of allowed origins
+  * AUTH_TOKEN
+    * UUIDv4 token used for user sign up
 
 
 # Deployment
