@@ -23,8 +23,10 @@ const signup = async (req, res, next) => {
 
     // Validate Token
     if (!token || token !== process.env.AUTH_TOKEN) {
-        res.status(httpStatus.UNAUTHORIZED).json("Token missing or invalid");
+        console.log(`User provided invalid sign up token: "${token}"`);
+        return res.status(httpStatus.UNAUTHORIZED).json("Token missing or invalid");
     }
+    console.log(`User provided valid sign up token`);
 
     // Validate data
 
@@ -49,6 +51,7 @@ const signup = async (req, res, next) => {
         // alert user to conflict
         const conflict = (exists.email === normalizedEmail) ? "Email" : "Username";
         const info = (exists.email === normalizedEmail) ? normalizedEmail : usernames;
+        console.log(`A user with ${conflict}: "${info}" already exists.`);
         return res.status(httpStatus.CONFLICT).json({
             error: {
                 code: httpStatus.CONFLICT,
@@ -74,9 +77,8 @@ const signup = async (req, res, next) => {
     }
 
 
-
-
     // pass json back and let frontend redirect
+    console.log(`User succesfully created`);
     res.status(httpStatus.ACCEPTED).json();
 };
 

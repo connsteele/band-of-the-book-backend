@@ -64,7 +64,7 @@ async function readPosts(req, res, next) {
         book: post.book.title,
         author: post.book.author,
         series: post.book.series,
-        entry: post.book.entry.toNumber(),
+        entry: post.book.entry ? post.book.entry.toNumber() : null,
         genres: post.book.genres.map((g) => g.name),
         formats: post.formats.map((f) => f.name),
         cover: post.book.cover
@@ -95,15 +95,18 @@ async function createPostForUser(req, res, next) {
         cover,
         genres: rawGenres,
         formats: rawFormats,
-        series = undefined,
-        entry = undefined,
-        score,
+        series: rawSeries,
+        entry: rawEntry,
+        score:  rawScore,
         content
     } = req.body;
 
+    // Restructure data
     const genres = Array.isArray(rawGenres) ? rawGenres : [rawGenres];
     const formats = Array.isArray(rawFormats) ? rawFormats : [rawFormats];
-
+    const series = rawSeries.length > 0 ? rawSeries : null;
+    const entry = rawEntry.length > 0 ? parseFloat(rawEntry) : null;
+    const score = parseFloat(rawScore);
     // For book only create if it does not exist
         // Can connectORCreate on unique field
     const result = await prisma.post.create({
