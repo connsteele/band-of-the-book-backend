@@ -1,10 +1,66 @@
 const httpStatus = require("../constants/httpStatus");
 const prisma = require("../db/prisma");
 const bcrypt = require("bcryptjs");
+
 const SALT = 12; // Salt Length
 
-const login = (req, res, next) => {
-    res.send("In");
+/**
+ * Body is validated by loginValidation middleware before login is called
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+const login = async (req, res, next) => {
+    try {
+        // Find the User
+        const { email, password: inPassword } = req.body;
+        const user = await prisma.user.findFirst({
+            where: { email: email },
+            select: {
+                name: true,
+                password: true,
+            },
+        });
+
+        if (!user) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                error: {
+                    code: httpStatus.BAD_REQUEST,
+                    message: `Login failed, user with ${email} does not exist`
+                }
+            });
+        }
+
+        console.log(`Found user "${user.name}" associated with ${email}`);
+
+        // Verify password matches
+        const verify = await bcrypt.compare(inPassword, user.password);
+        if (!verify) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                error: {
+                    code: httpStatus.BAD_REQUEST,
+                    message: `Login failed, password does not match`
+                }
+            });
+        }
+
+        // Generate Access token & refresh token
+        next();
+
+
+    } catch (e) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+            error: {
+                code: httpStatus.BAD_REQUEST,
+                message: "Login failed, credentials could not be found"
+            }
+        });
+    }
+
+
+    res.status(httpStatus.ACCEPTED).json({
+        message: "cookie",
+    });
 };
 
 const logout = (req, res, next) => {
