@@ -10,7 +10,7 @@ const SALT = 12; // Salt Length
  * @param {*} res 
  * @param {*} next 
  */
-const login = async (req, res, next) => {
+const login = async (req, res) => {
     try {
         // Find the User
         const { email, password: inPassword } = req.body;
@@ -45,7 +45,11 @@ const login = async (req, res, next) => {
         }
 
         // Generate Access token & refresh token
-        next();
+        return res.status(httpStatus.OK).json({
+            message: "Login Successful",
+            accessToken: "access",
+            refreshToken: "refresh",
+        });
 
 
     } catch (e) {
@@ -57,10 +61,6 @@ const login = async (req, res, next) => {
         });
     }
 
-
-    res.status(httpStatus.ACCEPTED).json({
-        message: "cookie",
-    });
 };
 
 const logout = (req, res, next) => {
