@@ -14,6 +14,9 @@ Backend for book blog
     * Comma seperated list of allowed origins
   * AUTH_TOKEN
     * UUIDv4 token used for user sign up
+  * JWT_SECRET
+    * Strong random secret (min 32 bytes / 256 bits) used to sign JWTs
+    * Generate: `openssl rand -hex 32`
 
 
 # Deployment

@@ -1,6 +1,8 @@
 const httpStatus = require("../constants/httpStatus");
 const prisma = require("../db/prisma");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 
 const SALT = 12; // Salt Length
 
@@ -17,6 +19,7 @@ const login = async (req, res) => {
         const user = await prisma.user.findFirst({
             where: { email: email },
             select: {
+                id: true,
                 name: true,
                 password: true,
             },
@@ -45,11 +48,49 @@ const login = async (req, res) => {
         }
 
         // Generate Access token & refresh token
-        return res.status(httpStatus.OK).json({
-            message: "Login Successful",
-            accessToken: "access",
-            refreshToken: "refresh",
-        });
+        const accessExpires = "15m";
+        const issuer = "band-of-the-book";
+        const algorithm = "HS256";
+        const secret = process.env.JWT_SECRET;
+
+        const accessToken = jwt.sign(
+            {
+                email: email,
+                sub: user.id, // Subject
+
+            },
+            secret,
+            {
+                expiresIn: accessExpires,
+                issuer: issuer,
+                algorithm: algorithm,
+            },
+        );
+
+        const refreshToken = uuidv4();
+        const offset = {
+            day: 30, // Only value to change
+            hours: 24, // hours in a day
+            minutes: 60, // minutes in a hour
+            seconds: 60, // seconds in a minute
+            ms: 1000 // ms in a second
+        }
+        const refreshExpires = new Date(Date.now() +
+            offset.day * offset.hours * offset.minutes * offset.seconds * offset.ms);
+
+
+
+        return res
+            .status(httpStatus.OK)
+            .cookie("accessToken", accessToken, {
+                httpOnly: true,
+            })
+            .cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+            })
+            .json({
+                message: "Login Successful",
+            });
 
 
     } catch (e) {
